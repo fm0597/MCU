@@ -1,0 +1,147 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+I:\µ¥Æ¬»ú\MyProjectXI\Main.uvproj
+Project File Date:  12/11/2013
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+MAIN.C(73): warning C206: 'a_com': missing function-prototype
+MAIN.C(79): warning C206: 'b_com': missing function-prototype
+MAIN.C(86): warning C206: 'c_com': missing function-prototype
+MAIN.C(94): warning C206: 'r_com': missing function-prototype
+MAIN.C(207): error C231: 'a_com': redefinition
+MAIN.C(217): error C231: 'a_com': redefinition
+MAIN.C(219): error C231: 'b_com': redefinition
+MAIN.C(227): error C231: 'b_com': redefinition
+MAIN.C(229): error C231: 'c_com': redefinition
+MAIN.C(236): error C231: 'c_com': redefinition
+MAIN.C(262): error C231: 'r_com': redefinition
+MAIN.C(264): error C231: 'r_com': redefinition
+Main.c(410): warning C316: unterminated conditionals
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+MAIN.C(73): warning C206: 'a_com': missing function-prototype
+MAIN.C(79): warning C206: 'b_com': missing function-prototype
+MAIN.C(86): warning C206: 'c_com': missing function-prototype
+MAIN.C(94): warning C206: 'r_com': missing function-prototype
+MAIN.C(207): error C231: 'a_com': redefinition
+MAIN.C(217): error C231: 'a_com': redefinition
+MAIN.C(219): error C231: 'b_com': redefinition
+MAIN.C(227): error C231: 'b_com': redefinition
+MAIN.C(229): error C231: 'c_com': redefinition
+MAIN.C(236): error C231: 'c_com': redefinition
+MAIN.C(267): error C231: 'r_com': redefinition
+MAIN.C(269): error C231: 'r_com': redefinition
+Main.c(415): warning C316: unterminated conditionals
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+Main.c(416): warning C316: unterminated conditionals
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?LCD
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCD_WSTRING?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?SERIAL_INT?MAIN
+Program Size: data=55.0 xdata=0 code=1473
+creating hex file from "Main"...
+"Main" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+MAIN.C(280): warning C206: 'd_com': missing function-prototype
+MAIN.C(281): warning C206: 'e_com': missing function-prototype
+Main.c(411): warning C316: unterminated conditionals
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?LCD
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCD_WSTRING?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?SERIAL_INT?MAIN
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  D_COM
+    MODULE:  Main.obj (MAIN)
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  E_COM
+    MODULE:  Main.obj (MAIN)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  D_COM
+    MODULE:  Main.obj (MAIN)
+    ADDRESS: 0AC2H
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  E_COM
+    MODULE:  Main.obj (MAIN)
+    ADDRESS: 0AC7H
+Program Size: data=55.0 xdata=0 code=1471
+creating hex file from "Main"...
+"Main" - 0 Error(s), 10 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+Main.c(416): warning C316: unterminated conditionals
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?LCD
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCD_WSTRING?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?SERIAL_INT?MAIN
+Program Size: data=55.0 xdata=0 code=1473
+creating hex file from "Main"...
+"Main" - 0 Error(s), 4 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+Main.c(416): warning C316: unterminated conditionals
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?D_COM?MAIN
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?E_COM?MAIN
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCD_WSTRING?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?SERIAL_INT?MAIN
+Program Size: data=55.0 xdata=0 code=1417
+creating hex file from "Main"...
+"Main" - 0 Error(s), 6 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling lcd.c...
+lcd.c(63): warning C316: unterminated conditionals
+compiling Main.c...
+Main.c(411): warning C316: unterminated conditionals
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?LCD
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCD_WSTRING?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?SERIAL_INT?MAIN
+Program Size: data=55.0 xdata=0 code=1415
+creating hex file from "Main"...
+"Main" - 0 Error(s), 4 Warning(s).

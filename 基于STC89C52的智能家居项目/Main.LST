@@ -1,0 +1,447 @@
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN Main.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                                                                                                                                   
+   2          #include <reg52.h>
+   3          #include <intrins.h>
+   4          #include <string.h>
+   5          #include <lcd.h>
+   6          #define uchar unsigned char 
+   7          #define uint  unsigned int
+   8          #define flag  unsigned char
+   9          
+  10          //char *s="www.zhbit.com";
+  11          
+  12          sfr ISP_CONTR = 0xe7;                   //定义寄存器
+  13          sbit lcd_bk_light=P1^3;                 //lcd背光控制端口
+  14          
+  15          sbit P14 = P1^4;                                //无线遥控A口
+  16          sbit P15 = P1^5;                            //无线遥控B口
+  17          sbit P16 = P1^6;                                //无线遥控C口
+  18          sbit P17 = P1^7;                                //无线遥控D口
+  19          
+  20          sbit  infrared_flag=P2^0;               //红外传感器状态
+  21          sbit  lamp=P2^1;                                //台灯，接继电器，低电平点亮
+  22          sbit  light_button=P2^2;                //照明led手动开关
+  23          sbit  light=P2^3;                               //照明led
+  24          sbit  light_status=P2^4;                //光敏状态
+  25          sbit  pilot_light=P2^5;                 //照明手动开关指示灯
+  26          sbit  beep=P2^6;                                //蜂鸣器
+  27          
+  28          uint  light_num=0;                              //控制照明led亮的秒数
+  29          uint  infrared_num=0;                   //红外延时参数
+  30          uint  lcd_bk_num=0;                             //lcd背光秒数
+  31          
+  32          flag light_flag=0;                          //照明led自动亮的开关
+  33          flag infrared_ex_status;                //红外上一状态
+  34          flag infrared_2stimeflag;               //红外2s后关闭标志
+  35          flag infrared_switch=0;                 //红外感应总开关,0/1:开关开/开关关
+  36          flag bluetooth_lamp_flag=0;             //蓝牙台灯手动开关，0/1:关闭标记/打开标记
+  37          flag lamp_close_flag=0;                 //不受红外控制标记,0/1:关闭标记/打开标记
+  38          flag beepflag=0;                                //声音标记，0/1:声音开/声音关
+  39          flag firebeep_flag = 0;                 //烟雾传感器
+  40          flag lcd_bk_flag = 0;                   //lcd背光标记，0/1:关：开
+  41          flag wuxian_flag = 0;                   //无线标记
+  42          
+  43          void  delay(uchar i)                    //延时函数
+  44          {
+  45   1              uchar j=110;
+  46   1              while(i--)
+  47   1              while(j--);
+  48   1      }
+  49          void beepbeep()                                 //蜂鸣器
+  50          {
+  51   1              if(beepflag==0)
+  52   1              {
+  53   2                      beep=0;
+  54   2                      delay(5);
+  55   2                      beep=1;
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 2   
+
+  56   2              }
+  57   1              
+  58   1      }
+  59          void a_com()                               //台灯开，强制开，不受彻底关闭模式限制
+  60          {
+  61   1              if(lamp==1)
+  62   1              {
+  63   2                      lamp=0;
+  64   2                      lamp_close_flag=0;              //关闭彻底关闭模式
+  65   2                      bluetooth_lamp_flag=1;
+  66   2                      infrared_2stimeflag = 0;        
+  67   2              
+  68   2              }
+  69   1              
+  70   1      }
+  71          void b_com()                            //台灯关，关闭后为受红外控制状态
+  72          {
+  73   1              if(lamp==0)
+  74   1              {
+  75   2                      lamp=1;
+  76   2                      bluetooth_lamp_flag=0;
+  77   2              
+  78   2              }
+  79   1              
+  80   1      }
+  81          void c_com()                            //led照明开
+  82          {
+  83   1              if(light==1)
+  84   1              {
+  85   2                      light=0;
+  86   2                      light_flag=1;
+  87   2              }
+  88   1              
+  89   1      }
+  90          
+  91          void f_com()                                            //看电影模式，关闭lamp，不受红外控制
+  92          {
+  93   1              if(lamp_close_flag==0)                  //打开标记
+  94   1              {
+  95   2                      lamp_close_flag=1;
+  96   2                      if(lamp==0)
+  97   2                      {
+  98   3                              infrared_2stimeflag     = 0;
+  99   3                              b_com();                                        //关闭台灯
+ 100   3                      }
+ 101   2              
+ 102   2              //      else beepbeep();
+ 103   2              }
+ 104   1      }
+ 105          void g_com()                                            //关闭看电影模式，回到正常状态
+ 106          {
+ 107   1              if(lamp_close_flag==1)
+ 108   1              {
+ 109   2                      lamp_close_flag=0;
+ 110   2                      infrared_2stimeflag = 1;
+ 111   2                      beepbeep();
+ 112   2              }
+ 113   1      }
+ 114          void r_com()                                            //系统复位
+ 115          {
+ 116   1              ISP_CONTR = 0x20;       
+ 117   1      }
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 3   
+
+ 118          
+ 119          void v_com()
+ 120          {
+ 121   1              if(beepflag==0) beepflag=1;
+ 122   1              else beepflag=0;
+ 123   1      }
+ 124          void int0()interrupt 0          //外部中断0服务程序，低电平触发，接烟雾传感器
+ 125          {
+ 126   1              beep = 0;
+ 127   1              delay(30);
+ 128   1              beep = 1;
+ 129   1              delay(30);
+ 130   1      }
+ 131          void int1()interrupt 2
+ 132          {
+ 133   1              delay(20);                                                              //等待端口反应
+ 134   1              if(P14==0)                                                         //打开关闭/台灯
+ 135   1              {
+ 136   2                      if(wuxian_flag == 0)
+ 137   2                      {
+ 138   3                              a_com();
+ 139   3                              wuxian_flag = 1;
+ 140   3                      }
+ 141   2                      
+ 142   2                      else
+ 143   2                      {
+ 144   3                               b_com();
+ 145   3                               wuxian_flag = 0;
+ 146   3                       }
+ 147   2              }
+ 148   1              
+ 149   1              if(P15==0)                                                  //打开照明led
+ 150   1              {
+ 151   2                      c_com();
+ 152   2              }
+ 153   1              if(P16==0)                                                      //打开lcd背光
+ 154   1              {
+ 155   2                      lcd_bk_flag=1;
+ 156   2              }
+ 157   1              if(P17==0)                                                      //重启单片机
+ 158   1              {
+ 159   2                      r_com();
+ 160   2              }
+ 161   1              beepbeep();
+ 162   1      }
+ 163          void time0()interrupt 1
+ 164          {
+ 165   1              TH0=(65536-50000)/256;
+ 166   1              TL0=(65536-50000)%256;
+ 167   1              if(light_flag)                          //照明led定时
+ 168   1              {
+ 169   2                      light_num++;
+ 170   2                      if(light_num>20*15)         //15秒后关灯
+ 171   2                      {
+ 172   3                              light=1;
+ 173   3                              light_num=0;
+ 174   3                              light_flag=0;
+ 175   3                      }
+ 176   2              }
+ 177   1              
+ 178   1              if(lcd_bk_flag)
+ 179   1              {
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 4   
+
+ 180   2                      lcd_bk_num++;
+ 181   2                      if(lcd_bk_num>=20*10)    //10秒后关灯
+ 182   2                      {
+ 183   3                               lcd_bk_flag = 0;
+ 184   3                               lcd_bk_num = 0;
+ 185   3                      }
+ 186   2              }
+ 187   1              if(infrared_2stimeflag==1)              //台灯关闭时延时部分
+ 188   1              {
+ 189   2                      infrared_num++;
+ 190   2                      if(infrared_num>=20*2)
+ 191   2                      {
+ 192   3                              lamp=1;                                 //台灯关
+ 193   3                              infrared_num=0;
+ 194   3                              infrared_2stimeflag=0;
+ 195   3                              infrared_ex_status=0;
+ 196   3                              if(light_status==1)             //当离开红外感应时，检测环境亮度
+ 197   3                              {
+ 198   4                                      light_flag=1;
+ 199   4                                      light=0;
+ 200   4                              }
+ 201   3                              else light_flag=0;
+ 202   3                      }
+ 203   2              }
+ 204   1              
+ 205   1              
+ 206   1      }
+ 207          void sendmes(uchar *p)                            //发送字符串函数
+ 208          {
+ 209   1              while(*p)
+ 210   1              {
+ 211   2                      SBUF=*p;
+ 212   2                      while(TI==0);
+ 213   2                      TI=0;
+ 214   2                      p++;
+ 215   2              }
+ 216   1      }
+ 217          void check()                                               //检查当前状态函数
+ 218          {
+ 219   1              
+ 220   1              uchar *str1="Lamp:Always On!";
+ 221   1              uchar *str2="Lamp:On! ";
+ 222   1              uchar *str3="Lamp:Off!";
+ 223   1              uchar *str4="Lamp:Always Off!";
+ 224   1              uchar *str5="The infrared:OFF!";
+ 225   1              uchar *str6="The infrared:On!";
+ 226   1              uchar *str7="Beep:Open!";
+ 227   1              uchar *str8="Beep:close!";
+ 228   1      
+ 229   1              lcd_write_com(0x01);                       
+ 230   1              if(bluetooth_lamp_flag==1)
+ 231   1              {
+ 232   2                      sendmes(str1);
+ 233   2                      lcd_write_com(0x80);
+ 234   2                      lcd_wstring(str1);
+ 235   2              }
+ 236   1              if(bluetooth_lamp_flag==0&&lamp==0)
+ 237   1              {
+ 238   2                      sendmes(str2);
+ 239   2                      lcd_write_com(0x80);
+ 240   2                      lcd_wstring(str2);
+ 241   2              }
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 5   
+
+ 242   1              if(lamp==1&&lamp_close_flag==0)
+ 243   1              {
+ 244   2                      sendmes(str3);
+ 245   2                      lcd_write_com(0x80);
+ 246   2                      lcd_wstring(str3);
+ 247   2              }
+ 248   1              if(lamp_close_flag==1)
+ 249   1              {
+ 250   2                      sendmes(str4);
+ 251   2                      lcd_write_com(0x80);
+ 252   2                      lcd_wstring(str4);
+ 253   2              }
+ 254   1              if(beepflag==0)
+ 255   1              {
+ 256   2                      sendmes(str7);
+ 257   2                      lcd_write_com(0xc0);
+ 258   2                      lcd_wstring(str7);
+ 259   2              }
+ 260   1              else 
+ 261   1              {
+ 262   2                      sendmes(str8);
+ 263   2                      lcd_write_com(0xc0);
+ 264   2                      lcd_wstring(str8);
+ 265   2              }
+ 266   1      
+ 267   1              beepbeep();
+ 268   1              
+ 269   1      }
+ 270          
+ 271          
+ 272          void com_chose(uchar com)
+ 273          {       
+ 274   1              switch(com)
+ 275   1              {
+ 276   2                      case 'x':check();break;                                         //查询状态
+ 277   2                      case 'a':a_com();check();break;                                    //开灯，不受红外控制
+ 278   2                      case 'b':b_com();check();break;                                //关灯，受红外控制
+ 279   2                      case 'c':c_com();check();break;                                    //开照明led
+ 280   2      //              case 'd':d_com();check();break;
+ 281   2      //              case 'e':e_com();check();break;
+ 282   2                      case 'f':f_com();check();break;                                         //看电影模式，关灯，不受红外控制
+ 283   2                      case 'g':g_com();check();break;                                         //关闭看电影模式，回正常状态
+ 284   2                      case 'r':r_com();check();break;                                         //软件复位
+ 285   2              //      case 't':t_com();check();break;                                         //查看时间
+ 286   2                      case 'v':v_com();check();break;                                         //音效开关
+ 287   2              }
+ 288   1      }
+ 289          void serial_int() interrupt 4           //串口中断服务程序
+ 290          {
+ 291   1              uchar com;
+ 292   1              if(RI)
+ 293   1              {
+ 294   2                      com=SBUF;
+ 295   2                      com_chose(com);
+ 296   2                      RI=0;
+ 297   2              }
+ 298   1      
+ 299   1      }
+ 300          
+ 301          void Infrared()
+ 302          {
+ 303   1              if(!infrared_switch)
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 6   
+
+ 304   1              {
+ 305   2                      if(bluetooth_lamp_flag==1)              //蓝牙手动开关
+ 306   2                      {
+ 307   3                              lamp=0;
+ 308   3                      }
+ 309   2                      else if(infrared_flag==0)               //红外感应检测到人体
+ 310   2                      {
+ 311   3                              if(lamp_close_flag==0)          //屏蔽红外标志
+ 312   3                              lamp=0;                                         //台灯开
+ 313   3                              infrared_ex_status=1;           //状态置为1
+ 314   3                      }
+ 315   2                      else if(infrared_ex_status==0)
+ 316   2                      {
+ 317   3                              lamp=1;
+ 318   3                      }
+ 319   2                      else if(infrared_ex_status==1)
+ 320   2                      {
+ 321   3                              infrared_2stimeflag=1;
+ 322   3                      }
+ 323   2              }
+ 324   1                      
+ 325   1              
+ 326   1              
+ 327   1      }
+ 328          void Light()
+ 329          {
+ 330   1              if(!light_button)               
+ 331   1              {
+ 332   2                      
+ 333   2                      pilot_light=0;          //指示灯开
+ 334   2                      if(light_flag==1) 
+ 335   2                      {light_flag=0;}         //检测是否在自动照明模式，是就关闭自动照明模式
+ 336   2                      light=0;
+ 337   2                      
+ 338   2              }
+ 339   1              else 
+ 340   1              {
+ 341   2              
+ 342   2                      pilot_light=1;          //指示灯关
+ 343   2                      if(light_flag==0)       //检测是否在自动照明模式，否就关闭灯
+ 344   2                      light=1;
+ 345   2                      
+ 346   2              }
+ 347   1              
+ 348   1      
+ 349   1              if(lcd_bk_flag)                 //控制lcd背光
+ 350   1              {
+ 351   2                      lcd_bk_light = 0;       
+ 352   2              }
+ 353   1              else lcd_bk_light = 1;
+ 354   1      }
+ 355          
+ 356          
+ 357          void init()
+ 358          {
+ 359   1              TMOD=0x01;
+ 360   1              TMOD|=0x20;
+ 361   1              TH0=(65536-50000)/256;
+ 362   1              TL0=(65536-50000)%256;
+ 363   1      
+ 364   1              TH1=0xfd;
+ 365   1              TL1=0xfd;
+C51 COMPILER V9.01   MAIN                                                                  01/01/2014 22:31:17 PAGE 7   
+
+ 366   1              
+ 367   1              EA=1;
+ 368   1              ET0=1;
+ 369   1              
+ 370   1              EX0=1;
+ 371   1              IT0=0;
+ 372   1      
+ 373   1              EX1=1;
+ 374   1              IT1=1;
+ 375   1      
+ 376   1              TR0=1;
+ 377   1              
+ 378   1              SCON=0x50;        
+ 379   1              PCON=0x00;
+ 380   1              TR1=1;
+ 381   1              ES=1;
+ 382   1      
+ 383   1              //P14 = 0;
+ 384   1              //P15 = 0;
+ 385   1      //      P16 = 0;
+ 386   1      //      P17 = 0;
+ 387   1      
+ 388   1              lcd_init();
+ 389   1              lcd_write_com(0x82);
+ 390   1              lcd_wstring("Welcome To");
+ 391   1              lcd_write_com(0xc0);
+ 392   1              lcd_wstring("Intelligent Home");
+ 393   1      
+ 394   1      }
+ 395          
+ 396          void main()
+ 397          {
+ 398   1              
+ 399   1              
+ 400   1              init();
+ 401   1              
+ 402   1              
+ 403   1              while(1)
+ 404   1              {
+ 405   2                      Light();
+ 406   2                      
+ 407   2                      Infrared();
+ 408   2                      
+ 409   2              
+ 410   2              }
+ 411   1      }
+*** WARNING C316 IN LINE 411 OF Main.c: unterminated conditionals
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    907    ----
+   CONSTANT SIZE    =    139    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     16      24
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

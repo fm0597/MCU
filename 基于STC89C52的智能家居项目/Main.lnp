@@ -1,0 +1,5 @@
+"STARTUP.obj",
+"lcd.obj",
+"Main.obj" 
+TO "Main" 
+RAMSIZE(256) 
